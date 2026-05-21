@@ -1,0 +1,45 @@
+# Python virtual environments
+.venv
+venv
+env
+ENV
+.venv/
+venv/
+env/
+ENV/
+
+# Large Docker backup tarballs and archives
+*.tar
+*.tar.gz
+*.zip
+*.tgz
+backend_img.tar
+frontend_img.tar
+app_deploy.tar.gz
+
+# SQL dumps
+*.sql
+watertracker.sql
+
+# Local database files
+.db.sqlite3
+db.sqlite3
+
+# Node modules and build distributions (recursive)
+**/node_modules
+**/dist
+node_modules/
+apps/water_tracker/frontend/node_modules/
+apps/water_tracker/frontend/dist/
+
+# Git and IDE configs
+.git
+.gitignore
+.vscode
+.idea
+
+# Build/Deploy staging
+staging/
+/staticfiles
+/media
+.env
