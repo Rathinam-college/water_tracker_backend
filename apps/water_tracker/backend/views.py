@@ -18,7 +18,6 @@ from .models import (
     MasterLocation,
     MasterSource,
     MasterInternalVehicle,
-    MasterVendorVehicle,
     RateHistoryInternalVehicle,
     RateHistoryVendor,
     RateHistoryPipeline,
@@ -39,7 +38,6 @@ from .serializers import (
     MasterLocationSerializer,
     MasterSourceSerializer,
     MasterInternalVehicleSerializer,
-    MasterVendorVehicleSerializer,
     RateHistoryInternalVehicleSerializer,
     RateHistoryVendorSerializer,
     RateHistoryPipelineSerializer,
@@ -126,12 +124,6 @@ class MasterSourceViewSet(viewsets.ModelViewSet):
 class MasterInternalVehicleViewSet(viewsets.ModelViewSet):
     queryset = MasterInternalVehicle.objects.all()
     serializer_class = MasterInternalVehicleSerializer
-    pagination_class = None
-
-
-class MasterVendorVehicleViewSet(viewsets.ModelViewSet):
-    queryset = MasterVendorVehicle.objects.all()
-    serializer_class = MasterVendorVehicleSerializer
     pagination_class = None
 
 
@@ -320,6 +312,7 @@ class YieldEntryViewSet(viewsets.ModelViewSet):
         data = request.data
         entries_data = data.get("entries", [])
         entry_date = data.get("date")
+        original_date = data.get("original_date")
 
         if not entries_data or not entry_date:
             return Response(
@@ -330,6 +323,14 @@ class YieldEntryViewSet(viewsets.ModelViewSet):
         created_entries = []
         try:
             with transaction.atomic():
+                if original_date and original_date != entry_date:
+                    try:
+                        orig_date_obj = datetime.strptime(original_date, "%Y-%m-%d").date()
+                        location_ids = [e.get("location_id") for e in entries_data if e.get("location_id")]
+                        YieldEntry.objects.filter(date=orig_date_obj, location_id__in=location_ids).delete()
+                    except ValueError:
+                        pass
+
                 for entry in entries_data:
                     loc_id = entry.get("location_id")
                     location = YieldLocation.objects.get(id=loc_id)
@@ -722,6 +723,7 @@ class ConsumptionEntryViewSet(viewsets.ModelViewSet):
         data = request.data
         entries_data = data.get("entries", [])
         entry_date = data.get("date")
+        original_date = data.get("original_date")
 
         if not entries_data or not entry_date:
             return Response(
@@ -732,6 +734,14 @@ class ConsumptionEntryViewSet(viewsets.ModelViewSet):
         created_entries = []
         try:
             with transaction.atomic():
+                if original_date and original_date != entry_date:
+                    try:
+                        orig_date_obj = datetime.strptime(original_date, "%Y-%m-%d").date()
+                        location_ids = [e.get("location_id") for e in entries_data if e.get("location_id")]
+                        ConsumptionEntry.objects.filter(date=orig_date_obj, location_id__in=location_ids).delete()
+                    except ValueError:
+                        pass
+
                 for entry in entries_data:
                     loc_id = entry.get("location_id")
                     current_reading = Decimal(str(entry.get("current_reading") or 0))
@@ -1344,7 +1354,7 @@ def dashboard_stats(request):
                 loading_location__location_name__icontains="Bannari",
             )
             .exclude(source__source_type="Pipeline")
-            .select_related("unloading_location")
+            .select_related("unloading_location", "vehicle")
         )
 
         bw_location_data = {}
@@ -1357,6 +1367,10 @@ def dashboard_stats(request):
         }
 
         for entry in bannari_entries_breakdown:
+            load_count = entry.load_count if entry.load_count else 1
+            if (float(entry.total_quantity_liters) / load_count) == 22500:
+                continue
+
             loc_name = (
                 entry.unloading_location.location_name
                 if entry.unloading_location
@@ -1383,18 +1397,16 @@ def dashboard_stats(request):
             bw_grand_total["total_liters"] += liters
             bw_grand_total["total_amount"] += amount
 
-            # Determine Load Size
-            qty = float(entry.total_quantity_liters)
-            load_count = entry.load_count if entry.load_count else 1
-            avg_load_size = qty / load_count
+            # Determine Load Size based on Vehicle Capacity
+            capacity = entry.vehicle.capacity_liters if entry.vehicle else 0
 
-            if avg_load_size >= 20000:
+            if capacity >= 20000:
                 bw_location_data[loc_name]["count_25kl"] += load_count
                 bw_grand_total["count_25kl"] += load_count
-            elif avg_load_size >= 10000:
+            elif capacity >= 10000:
                 bw_location_data[loc_name]["count_12kl"] += load_count
                 bw_grand_total["count_12kl"] += load_count
-            elif avg_load_size >= 4000:
+            elif capacity >= 4000:
                 bw_location_data[loc_name]["count_6kl"] += load_count
                 bw_grand_total["count_6kl"] += load_count
 

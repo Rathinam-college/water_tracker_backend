@@ -12,7 +12,7 @@ const api = axios.create({
 // Add a request interceptor to add the auth token
 api.interceptors.request.use(
     (config) => {
-        const auth = localStorage.getItem('auth');
+        const auth = localStorage.getItem('wt_token');
         if (auth) {
             config.headers['Authorization'] = `Basic ${auth}`;
         }
@@ -28,8 +28,8 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
-            localStorage.removeItem('auth');
-            localStorage.removeItem('user');
+            localStorage.removeItem('wt_token');
+            localStorage.removeItem('wt_user');
             if (window.location.pathname !== '/water_tracker/login') {
                 window.location.href = '/water_tracker/login';
             }

@@ -12,6 +12,8 @@ const BulkConsumptionEntry = () => {
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [toast, setToast] = useState(null);
+    const [preventFetch, setPreventFetch] = useState(false);
+    const [originalDate, setOriginalDate] = useState(date);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -24,6 +26,7 @@ const BulkConsumptionEntry = () => {
                 is_manual_previous: false,
                 comments: item.comments || ''
             })));
+            setOriginalDate(date);
         } catch (error) {
             console.error('Failed to fetch bulk data:', error);
             setToast({ message: 'Failed to fetch locations', type: 'error' });
@@ -33,8 +36,10 @@ const BulkConsumptionEntry = () => {
     }, [date, consumptionType]);
 
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        if (!preventFetch) {
+            fetchData();
+        }
+    }, [fetchData, preventFetch]);
 
     const handleReadingChange = (index, value) => {
         const newRows = [...rows];
@@ -77,7 +82,7 @@ const BulkConsumptionEntry = () => {
 
         setSubmitting(true);
         try {
-            await api.post('consumption-entries/bulk_create/', {
+            const payload = {
                 date,
                 entries: validEntries.map(r => ({
                     location_id: r.location_id,
@@ -87,7 +92,13 @@ const BulkConsumptionEntry = () => {
                     is_manual_previous: r.is_manual_previous,
                     comments: r.comments
                 }))
-            });
+            };
+
+            if (originalDate && originalDate !== date) {
+                payload.original_date = originalDate;
+            }
+
+            await api.post('consumption-entries/bulk_create/', payload);
             setToast({ message: `Successfully saved ${validEntries.length} entries`, type: 'success' });
             setTimeout(() => navigate('/consumption-entries'), 1500);
         } catch (error) {
@@ -132,16 +143,30 @@ const BulkConsumptionEntry = () => {
             </style>
             <div className="bg-white dark:bg-slate-800 shadow-md rounded-lg p-6 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                            Date
-                        </label>
-                        <input
-                            type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
-                        />
+                    <div className="flex items-end gap-4">
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                                Date
+                            </label>
+                            <input
+                                type="date"
+                                value={date}
+                                onChange={(e) => setDate(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+                            />
+                        </div>
+                        <div className="flex items-center mb-2">
+                            <input
+                                type="checkbox"
+                                id="preventFetch"
+                                checked={preventFetch}
+                                onChange={(e) => setPreventFetch(e.target.checked)}
+                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                            />
+                            <label htmlFor="preventFetch" className="ml-2 block text-sm text-gray-700 dark:text-slate-300 cursor-pointer">
+                                Change date without losing data
+                            </label>
+                        </div>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">

@@ -137,8 +137,8 @@ const InternalVehicleRates = () => {
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Internal Vehicle Rates</h2>
-                    <p className="text-gray-600 dark:text-slate-400 mt-1">Manage cost per load for company vehicles</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Registered Vehicle Rates</h2>
+                    <p className="text-gray-600 dark:text-slate-400 mt-1">Manage cost per load for internal and external vehicles</p>
                 </div>
                 <button
                     onClick={handleAdd}

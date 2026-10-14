@@ -115,6 +115,7 @@ const ConsumptionForm = ({
                         type="date"
                         value={consumptionFormData.date}
                         onChange={(e) => setConsumptionFormData({ ...consumptionFormData, date: e.target.value })}
+                        max={new Date().toISOString().split('T')[0]}
                         required
                         className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-white"
                     />

@@ -175,7 +175,7 @@ const YieldEntries = () => {
     const endIdx = Math.min(offset + limit, count);
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="w-full px-6 py-8">
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Yield Tracking Entries</h1>
@@ -211,7 +211,7 @@ const YieldEntries = () => {
 
             {/* Filters */}
             <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm mb-6 grid grid-cols-1 md:grid-cols-4 gap-4 border border-gray-100 dark:border-slate-700">
-                <div>
+                <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Date Range</label>
                     <div className="flex space-x-2">
                         <input

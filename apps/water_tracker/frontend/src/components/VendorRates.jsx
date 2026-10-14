@@ -48,10 +48,9 @@ const VendorRates = () => {
 
     const fetchData = useCallback(async () => {
         try {
-            const [ratesRes, sourcesRes, vendorVehiclesRes, internalVehiclesRes] = await Promise.all([
+            const [ratesRes, sourcesRes, internalVehiclesRes] = await Promise.all([
                 api.get('rates/vendor/'),
                 api.get('sources/'),
-                api.get('vendor-vehicles/'),
                 api.get('internal-vehicles/')
             ]);
             // Handle paginated responses
@@ -59,13 +58,11 @@ const VendorRates = () => {
             const sources = sourcesRes.data.results || sourcesRes.data;
             setVendors(sources.filter(s => s.source_type === 'Vendor'));
             
-            // Combine both vendor and internal vehicles so user can pick any capacity
-            const vendorVehs = vendorVehiclesRes.data.results || vendorVehiclesRes.data || [];
+            // Combine vehicles so user can pick any capacity
             const internalVehs = internalVehiclesRes.data.results || internalVehiclesRes.data || [];
             
             // Tag them so we know which is which in the dropdown
             const combinedVehicles = [
-                ...vendorVehs.map(v => ({ ...v, _type: 'Vendor', _id: `vendor_${v.id}` })),
                 ...internalVehs.map(v => ({ ...v, _type: 'Internal', _id: `internal_${v.id}` }))
             ];
             
@@ -103,9 +100,7 @@ const VendorRates = () => {
         let matchingRefId = '';
         if (rate.vehicle_ref_id) {
             const internalMatch = vehicles.find(v => v._type === 'Internal' && v.id === rate.vehicle_ref_id);
-            const vendorMatch = vehicles.find(v => v._type === 'Vendor' && v.id === rate.vehicle_ref_id);
             if (internalMatch) matchingRefId = internalMatch._id;
-            else if (vendorMatch) matchingRefId = vendorMatch._id;
             else matchingRefId = rate.vehicle_ref_id.toString();
         }
 
@@ -429,15 +424,8 @@ const VendorRates = () => {
                                         className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 dark:text-slate-100"
                                     >
                                         <option value="">Select Reference Vehicle</option>
-                                        <optgroup label="Vendor Vehicles">
-                                            {vehicles.filter(v => v._type === 'Vendor').map(vehicle => (
-                                                <option key={vehicle._id} value={vehicle._id}>
-                                                    {vehicle.vehicle_name} ({vehicle.capacity_liters}L)
-                                                </option>
-                                            ))}
-                                        </optgroup>
-                                        <optgroup label="Internal Vehicles">
-                                            {vehicles.filter(v => v._type === 'Internal').map(vehicle => (
+                                        <optgroup label="Available Vehicles">
+                                            {vehicles.map(vehicle => (
                                                 <option key={vehicle._id} value={vehicle._id}>
                                                     {vehicle.vehicle_name} ({vehicle.capacity_liters}L)
                                                 </option>

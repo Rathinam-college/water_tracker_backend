@@ -174,9 +174,10 @@ const Entries = () => {
 
             const response = await api.get('entries/export/', { params });
             const exportData = response.data.map(entry => ({
-                'Date': formatDate(entry.entry_date),
+                'Date': new Date(entry.entry_date),
                 'Shift': entry.shift,
-                'Source/Vehicle': entry.source_name || entry.vehicle_name,
+                'Source': entry.source_name || '-',
+                'Vehicle': entry.vehicle_name || '-',
                 'Loads': entry.load_count || '-',
                 'Water Type': entry.water_type,
                 'Loading Location': entry.loading_location_name || '-',
@@ -228,8 +229,8 @@ const Entries = () => {
             </div>
 
             {/* Filters */}
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div>
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
+                <div className="md:col-span-2 lg:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Date Range</label>
                     <div className="flex space-x-2">
                         <input

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import (
-    User, MasterLocation, MasterSource, MasterInternalVehicle, MasterVendorVehicle,
+    User, MasterLocation, MasterSource, MasterInternalVehicle,
     RateHistoryInternalVehicle, RateHistoryVendor, RateHistoryPipeline, WaterEntry,
     YieldLocation, YieldEntry, ConsumptionLocation, ConsumptionEntry,
     ConsumptionCategory, GeneralWaterRate, CategoryStudentCount,
@@ -42,10 +42,6 @@ class MasterInternalVehicleSerializer(serializers.ModelSerializer):
         model = MasterInternalVehicle
         fields = '__all__'
 
-class MasterVendorVehicleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MasterVendorVehicle
-        fields = '__all__'
 
 class RateHistoryInternalVehicleSerializer(serializers.ModelSerializer):
     loading_location_name = serializers.CharField(source='loading_location.location_name', read_only=True)
@@ -76,6 +72,27 @@ class WaterEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = WaterEntry
         fields = '__all__'
+
+    def to_internal_value(self, data):
+        # The frontend React form state contains empty strings ('') for unselected
+        # or empty fields, which causes DRF's integer/decimal/FK validators to fail.
+        # We clean these empty strings to None before validation.
+        if hasattr(data, 'copy'):
+            data = data.copy()
+        else:
+            data = dict(data)
+
+        nullable_fields = [
+            'source', 'loading_location', 'unloading_location', 'vehicle',
+            'load_count', 'meter_reading_current', 'meter_reading_previous',
+            'manual_capacity_liters', 'snapshot_cost_per_liter',
+            'snapshot_cost_per_kl', 'snapshot_paise_per_liter'
+        ]
+        for field in nullable_fields:
+            if field in data and data[field] == '':
+                data[field] = None
+
+        return super().to_internal_value(data)
 
 
 class YieldLocationSerializer(serializers.ModelSerializer):
