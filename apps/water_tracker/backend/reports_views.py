@@ -1652,7 +1652,6 @@ class MuthuNagarBuildingWiseReportView(APIView):
 
             location_data = {}
             grand_total = {
-                "count_25kl": 0,
                 "count_12kl": 0,
                 "count_6kl": 0,
                 "total_liters": 0,
@@ -1668,7 +1667,6 @@ class MuthuNagarBuildingWiseReportView(APIView):
                     location_data[loc_name] = {
                         "location": loc_name,
                         "location_id": loc_id,
-                        "count_25kl": 0,
                         "count_12kl": 0,
                         "count_6kl": 0,
                         "total_liters": 0,
@@ -1686,10 +1684,7 @@ class MuthuNagarBuildingWiseReportView(APIView):
                 load_count = entry.load_count if entry.load_count else 1
                 capacity = entry.vehicle.capacity_liters if entry.vehicle else 0
                 
-                if capacity >= 20000:
-                    location_data[loc_name]["count_25kl"] += load_count
-                    grand_total["count_25kl"] += load_count
-                elif capacity >= 10000:
+                if capacity >= 10000:
                     location_data[loc_name]["count_12kl"] += load_count
                     grand_total["count_12kl"] += load_count
                 elif capacity >= 4000:
@@ -1735,11 +1730,12 @@ class BannariBuildingWiseReportView(APIView):
                 entry_date__month=month,
                 water_type="Normal Water (Salt)",
                 loading_location__location_name__icontains="Bannari"
-            ).exclude(source__source_type="Pipeline").select_related("unloading_location")
+            ).exclude(source__source_type="Pipeline").select_related("unloading_location", "vehicle")
 
             location_data = {}
             grand_total = {
                 "count_25kl": 0,
+                "count_22_5kl": 0,
                 "count_12kl": 0,
                 "count_6kl": 0,
                 "total_liters": 0,
@@ -1756,6 +1752,7 @@ class BannariBuildingWiseReportView(APIView):
                         "location": loc_name,
                         "location_id": loc_id,
                         "count_25kl": 0,
+                        "count_22_5kl": 0,
                         "count_12kl": 0,
                         "count_6kl": 0,
                         "total_liters": 0,
@@ -1770,19 +1767,187 @@ class BannariBuildingWiseReportView(APIView):
                 grand_total["total_liters"] += liters
                 grand_total["total_amount"] += amount
 
-                # Determine Load Size (>=10000 for 12KL, >=4000 for 6KL)
+                # Determine Load Size based on calculation or Vehicle Capacity
                 load_count = entry.load_count if entry.load_count else 1
-                avg_load_size = liters / load_count
+                
+                if (liters / load_count) == 22500:
+                    calculated_loads = liters / 22500
+                    location_data[loc_name]["count_22_5kl"] += calculated_loads
+                    grand_total["count_22_5kl"] += calculated_loads
+                else:
+                    capacity = entry.vehicle.capacity_liters if entry.vehicle else 0
+                    if capacity >= 20000:
+                        location_data[loc_name]["count_25kl"] += load_count
+                        grand_total["count_25kl"] += load_count
+                    elif capacity >= 10000:
+                        location_data[loc_name]["count_12kl"] += load_count
+                        grand_total["count_12kl"] += load_count
+                    elif capacity >= 4000:
+                        location_data[loc_name]["count_6kl"] += load_count
+                        grand_total["count_6kl"] += load_count
 
-                if avg_load_size >= 20000:
-                    location_data[loc_name]["count_25kl"] += load_count
-                    grand_total["count_25kl"] += load_count
-                elif avg_load_size >= 10000:
-                    location_data[loc_name]["count_12kl"] += load_count
-                    grand_total["count_12kl"] += load_count
-                elif avg_load_size >= 4000:
+            # Convert to sorted list
+            report_data = list(location_data.values())
+            report_data.sort(key=lambda x: x["total_amount"], reverse=True)
+
+            month_name = calendar.month_name[month]
+
+            return Response({
+                "report_data": report_data,
+                "grand_total": grand_total,
+                "month_name": month_name,
+                "year": year
+            })
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+class VarahiBuildingWiseReportView(APIView):
+    """
+    Building Wise Water Purchase from Varahi Water
+    Query params: ?month=2&year=2026
+    """
+    def get(self, request):
+        try:
+            month = request.query_params.get('month')
+            year = request.query_params.get('year')
+
+            if not month or not year:
+                today = datetime.now()
+                month = today.month
+                year = today.year
+            
+            month = int(month)
+            year = int(year)
+
+            entries = WaterEntry.objects.filter(
+                entry_date__year=year,
+                entry_date__month=month,
+                water_type="Normal Water (Salt)",
+                loading_location__location_name__icontains="Varahi"
+            ).exclude(source__source_type="Pipeline").select_related("unloading_location", "vehicle")
+
+            location_data = {}
+            grand_total = {
+                "count_13kl": 0,
+                "total_liters": 0,
+                "total_amount": 0,
+            }
+
+            for entry in entries:
+                load_count = entry.load_count if entry.load_count else 1
+                if (float(entry.total_quantity_liters) / load_count) != 13000:
+                    continue
+
+                loc = entry.unloading_location
+                loc_name = loc.location_name if loc else "Unknown"
+                loc_id = loc.id if loc else None
+
+                if loc_name not in location_data:
+                    location_data[loc_name] = {
+                        "location": loc_name,
+                        "location_id": loc_id,
+                        "count_13kl": 0,
+                        "total_liters": 0,
+                        "total_amount": 0,
+                    }
+
+                liters = float(entry.total_quantity_liters)
+                amount = float(entry.total_cost)
+
+                location_data[loc_name]["total_liters"] += liters
+                location_data[loc_name]["total_amount"] += amount
+                grand_total["total_liters"] += liters
+                grand_total["total_amount"] += amount
+
+            # Compute 13KL Load count strictly by dividing total_liters by 13000
+            for data in location_data.values():
+                data["count_13kl"] = int(data["total_liters"] / 13000)
+            
+            grand_total["count_13kl"] = int(grand_total["total_liters"] / 13000)
+
+            # Convert to sorted list
+            report_data = list(location_data.values())
+            report_data.sort(key=lambda x: x["total_amount"], reverse=True)
+
+            month_name = calendar.month_name[month]
+
+            return Response({
+                "report_data": report_data,
+                "grand_total": grand_total,
+                "month_name": month_name,
+                "year": year
+            })
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class VarahiRathinamVehicleReportView(APIView):
+    def get(self, request):
+        try:
+            month = request.query_params.get('month')
+            year = request.query_params.get('year')
+
+            if not month or not year:
+                from datetime import datetime
+                today = datetime.now()
+                month = today.month
+                year = today.year
+            
+            month = int(month)
+            year = int(year)
+
+            entries = WaterEntry.objects.filter(
+                entry_date__year=year,
+                entry_date__month=month,
+                water_type__icontains="Normal Water",
+                loading_location__location_name__icontains="Varahi"
+            ).exclude(source__source_type="Pipeline").select_related("unloading_location", "vehicle")
+
+            location_data = {}
+            grand_total = {
+                "count_6kl": 0,
+                "count_12kl": 0,
+                "total_liters": 0,
+                "total_amount": 0,
+            }
+
+            for entry in entries:
+                load_count = entry.load_count if entry.load_count else 1
+                per_load = float(entry.total_quantity_liters) / load_count
+                
+                if per_load == 13000:
+                    continue
+
+                loc = entry.unloading_location
+                loc_name = loc.location_name if loc else "Unknown"
+                loc_id = loc.id if loc else None
+
+                if loc_name not in location_data:
+                    location_data[loc_name] = {
+                        "location": loc_name,
+                        "location_id": loc_id,
+                        "count_6kl": 0,
+                        "count_12kl": 0,
+                        "total_liters": 0,
+                        "total_amount": 0,
+                    }
+
+                liters = float(entry.total_quantity_liters)
+                amount = float(entry.total_cost)
+
+                if per_load == 6000:
                     location_data[loc_name]["count_6kl"] += load_count
                     grand_total["count_6kl"] += load_count
+                elif per_load == 12000:
+                    location_data[loc_name]["count_12kl"] += load_count
+                    grand_total["count_12kl"] += load_count
+
+                location_data[loc_name]["total_liters"] += liters
+                location_data[loc_name]["total_amount"] += amount
+                grand_total["total_liters"] += liters
+                grand_total["total_amount"] += amount
 
             # Convert to sorted list
             report_data = list(location_data.values())

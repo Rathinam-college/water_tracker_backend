@@ -343,13 +343,12 @@ const Dashboard = () => {
                 {stats.normal_water_breakdown && stats.normal_water_breakdown.length > 0 && (
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
                         <div className="p-6 border-b border-gray-50 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
-                            <h2 className="text-xl font-bold text-gray-800 dark:text-white">Building Wise Water Purchase from Muthu nagar well using Rathinam vehicle Feb'2026</h2>
+                            <h2 className="text-xl font-bold text-gray-800 dark:text-white">Building Wise Water Purchase from Muthu nagar well using Rathinam vehicle {new Date().toLocaleString('default', { month: 'short' })} '{new Date().getFullYear()}</h2>
                         </div>
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead className="bg-gray-50 dark:bg-gray-900/50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Location</th>
-                                    <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">25 KL</th>
                                     <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">12 KL</th>
                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">6 KL</th>
                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Total Liters</th>
@@ -371,7 +370,6 @@ const Dashboard = () => {
                                                 <span className="dark:text-gray-400">{item.location}</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 text-sm dark:text-gray-400 text-center">{item.count_25kl || '-'}</td>
                                         <td className="px-6 py-4 text-sm dark:text-gray-400 text-center">{item.count_12kl || '-'}</td>
                                         <td className="px-6 py-4 text-sm dark:text-gray-400 text-center">{item.count_6kl}</td>
                                         <td className="px-6 py-4 text-sm dark:text-gray-400">{item.total_liters.toLocaleString()} L</td>
@@ -383,7 +381,6 @@ const Dashboard = () => {
                                 <tfoot className="bg-gray-50 dark:bg-gray-900/80 font-bold border-t-2 border-gray-200 dark:border-gray-700">
                                     <tr>
                                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white uppercase">Grand Total</td>
-                                        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white text-center">{stats.normal_water_breakdown_total.count_25kl}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white text-center">{stats.normal_water_breakdown_total.count_12kl}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white text-center">{stats.normal_water_breakdown_total.count_6kl}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{stats.normal_water_breakdown_total.total_liters.toLocaleString()} L</td>
@@ -399,13 +396,12 @@ const Dashboard = () => {
                 {stats.bannari_water_breakdown && stats.bannari_water_breakdown.length > 0 && (
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
                         <div className="p-6 border-b border-gray-50 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
-                            <h2 className="text-xl font-bold text-gray-800 dark:text-white">Building Wise Water Purchase from Bannari Water Feb'2026</h2>
+                            <h2 className="text-xl font-bold text-gray-800 dark:text-white">Building Wise Normal Water Purchase from Bannari Water using rathinam vehicle {new Date().toLocaleString('default', { month: 'short' })} '{new Date().getFullYear()}</h2>
                         </div>
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead className="bg-gray-50 dark:bg-gray-900/50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Location</th>
-                                    <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">25 KL</th>
                                     <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">12 KL</th>
                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">6 KL</th>
                                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Total Liters</th>
@@ -427,7 +423,6 @@ const Dashboard = () => {
                                                 <span className="dark:text-gray-400">{item.location}</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 text-sm dark:text-gray-400 text-center">{item.count_25kl || '-'}</td>
                                         <td className="px-6 py-4 text-sm dark:text-gray-400 text-center">{item.count_12kl || '-'}</td>
                                         <td className="px-6 py-4 text-sm dark:text-gray-400 text-center">{item.count_6kl}</td>
                                         <td className="px-6 py-4 text-sm dark:text-gray-400">{item.total_liters.toLocaleString()} L</td>
@@ -439,7 +434,6 @@ const Dashboard = () => {
                                 <tfoot className="bg-gray-50 dark:bg-gray-900/80 font-bold border-t-2 border-gray-200 dark:border-gray-700">
                                     <tr>
                                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white uppercase">Grand Total</td>
-                                        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white text-center">{stats.bannari_water_breakdown_total.count_25kl}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white text-center">{stats.bannari_water_breakdown_total.count_12kl}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white text-center">{stats.bannari_water_breakdown_total.count_6kl}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{stats.bannari_water_breakdown_total.total_liters.toLocaleString()} L</td>

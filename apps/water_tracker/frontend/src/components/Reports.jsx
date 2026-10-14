@@ -16,6 +16,8 @@ import CategoryMonthlyBreakdown from './CategoryMonthlyBreakdown';
 import Procurement from './ProcurementReport';
 import MuthuNagarBuildingWise from './MuthuNagarBuildingWise';
 import BannariBuildingWise from './BannariBuildingWise';
+import VarahiBuildingWise from './VarahiBuildingWise';
+import VarahiRathinamVehicle from './VarahiRathinamVehicle';
 
 const Reports = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -37,7 +39,9 @@ const Reports = () => {
         { id: 'category-breakdown', label: '🏢 Category Monthly Breakdown', component: CategoryMonthlyBreakdown },
         { id: 'procurement', label: '📦 Procurement Report', component: Procurement },
         { id: 'muthu-nagar', label: '🏟️ Muthu Nagar Building Wise', component: MuthuNagarBuildingWise },
-        { id: 'bannari-building-wise', label: '🏢 Bannari Building Wise', component: BannariBuildingWise },
+        { id: 'bannari-building-wise', label: '🏢 Bannari', component: BannariBuildingWise },
+        { id: 'varahi-building-wise', label: '🏢 Varahi Building Wise', component: VarahiBuildingWise },
+        { id: 'varahi-rathinam-vehicle', label: '🏢 Varahi Purchase using Rathinam Vehicle', component: VarahiRathinamVehicle },
         { id: 'rates', label: '🏷️ Rate Details', component: RateDetails }
     ];
 

@@ -8,10 +8,17 @@ export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    const logout = () => {
+        localStorage.removeItem('wt_token');
+        localStorage.removeItem('wt_user');
+        setUser(null);
+        setIsAuthenticated(false);
+    };
+
     useEffect(() => {
         // Hydrate from localStorage on initial load
-        const storedUser = localStorage.getItem('user');
-        const authAuth = localStorage.getItem('auth');
+        const storedUser = localStorage.getItem('wt_user');
+        const authAuth = localStorage.getItem('wt_token');
 
         if (storedUser && authAuth) {
             try {
@@ -30,8 +37,8 @@ export const AuthProvider = ({ children }) => {
             const response = await api.post('login/', { username, password });
             if (response.data.user) {
                 const authString = btoa(`${username}:${password}`);
-                localStorage.setItem('auth', authString);
-                localStorage.setItem('user', JSON.stringify(response.data.user));
+                localStorage.setItem('wt_token', authString);
+                localStorage.setItem('wt_user', JSON.stringify(response.data.user));
                 setUser(response.data.user);
                 setIsAuthenticated(true);
                 return { success: true };
@@ -42,12 +49,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem('auth');
-        localStorage.removeItem('user');
-        setUser(null);
-        setIsAuthenticated(false);
-    };
+
 
     const isAdmin = () => {
         return user?.role === 'Admin';

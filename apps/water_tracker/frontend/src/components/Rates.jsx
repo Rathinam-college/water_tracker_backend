@@ -7,7 +7,7 @@ const Rates = () => {
     const [activeTab, setActiveTab] = useState('internal');
 
     const tabs = [
-        { id: 'internal', label: 'Internal Vehicles', component: InternalVehicleRates },
+        { id: 'internal', label: 'Registered Vehicles', component: InternalVehicleRates },
         { id: 'vendor', label: 'Vendors', component: VendorRates },
         { id: 'pipeline', label: 'Pipelines', component: PipelineRates }
     ];

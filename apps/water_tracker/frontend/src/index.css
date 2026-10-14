@@ -1,6 +1,44 @@
+@import './sidebar.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    /* Light Mode Variables for Sidebar */
+    --bg-navbar: #ffffff;
+    --bg-glass: rgba(0, 0, 0, 0.03);
+    --bg-glass-heavy: rgba(0, 0, 0, 0.06);
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-glass: rgba(0, 0, 0, 0.1);
+    --border-glass-bright: rgba(0, 0, 0, 0.15);
+    --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+    --color-primary: #2563eb; /* Blue-600 */
+    --color-secondary: #0ea5e9;
+    --radius-md: 12px;
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --gradient-1: rgba(37, 99, 235, 0.15);
+    --gradient-2: rgba(14, 165, 233, 0.15);
+    --gradient-3: rgba(59, 130, 246, 0.1);
+}
+
+.dark {
+    /* Dark Mode Variables for Sidebar */
+    --bg-navbar: #1e293b; /* slate-800 */
+    --bg-glass: rgba(255, 255, 255, 0.05);
+    --bg-glass-heavy: rgba(255, 255, 255, 0.08);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --border-glass-bright: rgba(255, 255, 255, 0.2);
+    --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    --color-primary: #3b82f6; /* Blue-500 */
+    --color-secondary: #38bdf8;
+    --gradient-1: rgba(59, 130, 246, 0.15);
+    --gradient-2: rgba(56, 189, 248, 0.15);
+    --gradient-3: rgba(96, 165, 250, 0.1);
+}
 
 /* Ensure clean, artifact-free rendering */
 html,
@@ -71,4 +109,143 @@ input, select, textarea {
 
 #root {
     min-height: 100vh;
+    display: flex;
+}
+
+/* RGU University Logo Animation Styles */
+.logo-container {
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto 1.5rem;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+#rgu-logo {
+  width: 100%;
+  height: auto;
+}
+
+.rgu-letter {
+  opacity: 0;
+  transform-origin: center;
+  animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.rgu-letter.r { animation-delay: 0.2s; }
+.rgu-letter.g { animation-delay: 0.4s; }
+.rgu-letter.u { animation-delay: 0.6s; }
+
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.name-part {
+  opacity: 0;
+  animation: slideFade 0.8s ease-out forwards;
+}
+
+.name-part.rathinam { animation-delay: 1.0s; }
+.name-part.global   { animation-delay: 1.2s; }
+.name-part.deemed   { animation-delay: 1.4s; }
+.name-part.university { animation-delay: 1.6s; }
+
+@keyframes slideFade {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.underline-group .line-segment {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: drawLine 0.8s ease-out forwards;
+}
+
+.underline-group .line-segment:nth-child(1) { animation-delay: 1.2s; }
+.underline-group .line-segment:nth-child(2) { animation-delay: 1.4s; }
+.underline-group .line-segment:nth-child(3) { animation-delay: 1.6s; }
+
+@keyframes drawLine {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes logoSlideUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+/* Ocean Theme */
+.ocean body {
+    background-color: #081229;
+    color: #f1f5f9;
+}
+.ocean {
+    --bg-navbar: #061124;
+    --color-primary: #0284c7; 
+    --color-secondary: #0ea5e9;
+    --gradient-1: rgba(2, 132, 199, 0.15);
+    --gradient-2: rgba(14, 165, 233, 0.15);
+    --bg-glass: rgba(255, 255, 255, 0.05);
+    --bg-glass-heavy: rgba(255, 255, 255, 0.08);
+}
+
+/* Robin Theme */
+.robin body {
+    background-color: #0d2121;
+    color: #f1f5f9;
+}
+.robin {
+    --bg-navbar: #091717;
+    --color-primary: #00cccc; 
+    --color-secondary: #00e5e5;
+    --gradient-1: rgba(0, 204, 204, 0.15);
+    --gradient-2: rgba(0, 229, 229, 0.15);
+    --bg-glass: rgba(255, 255, 255, 0.05);
+    --bg-glass-heavy: rgba(255, 255, 255, 0.08);
+}
+
+/* Override Tailwind Dark Utility Classes for Ocean */
+.ocean .dark\:bg-slate-900, .ocean.dark\:bg-slate-900 {
+    background-color: #081229 !important;
+}
+.ocean .dark\:bg-slate-800, .ocean.dark\:bg-slate-800 {
+    background-color: #0f2142 !important;
+}
+.ocean .dark\:border-slate-700, .ocean.dark\:border-slate-700 {
+    border-color: #1e3a8a !important;
+}
+
+/* Override Tailwind Dark Utility Classes for Robin */
+.robin .dark\:bg-slate-900, .robin.dark\:bg-slate-900 {
+    background-color: #0d2121 !important;
+}
+.robin .dark\:bg-slate-800, .robin.dark\:bg-slate-800 {
+    background-color: #143333 !important;
+}
+.robin .dark\:border-slate-700, .robin.dark\:border-slate-700 {
+    border-color: #215252 !important;
+}
+
+/* Login Background Orb Animations */
+@keyframes floatOrb1 {
+    0% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-30px, 50px) scale(1.1); }
+    66% { transform: translate(-80px, 20px) scale(0.95); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes floatOrb2 {
+    0% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -60px) scale(1.15); }
+    66% { transform: translate(70px, -20px) scale(0.9); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+.animate-orb-1 {
+    animation: floatOrb1 25s ease-in-out infinite;
+}
+
+.animate-orb-2 {
+    animation: floatOrb2 28s ease-in-out infinite reverse;
 }

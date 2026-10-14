@@ -17,8 +17,7 @@ const PurchaseForm = ({
     const [showComments, setShowComments] = useState(false);
     const [calculatedCost, setCalculatedCost] = useState(null);
 
-    // Vendor vehicle state
-    const [vendorVehicles, setVendorVehicles] = useState([]);
+    // We only use internal vehicles now (which include vendor registered vehicles)
     const [selectedVendorVehicle, setSelectedVendorVehicle] = useState('');
 
     const [formData, setFormData] = useState({
@@ -38,24 +37,7 @@ const PurchaseForm = ({
         comments: ''
     });
 
-    // Fetch vendor vehicles when a Vendor source is selected
-    useEffect(() => {
-        if (entryType === 'Vendor' && formData.source) {
-            const fetchVendorVehicles = async () => {
-                try {
-                    const response = await api.get(`vendor-vehicles/?vendor=${formData.source}`);
-                    const data = response.data.results || response.data || [];
-                    setVendorVehicles(data.filter(v => v.is_active));
-                } catch (err) {
-                    console.error('Failed to fetch vendor vehicles:', err);
-                }
-            };
-            fetchVendorVehicles();
-        } else {
-            setVendorVehicles([]);
-            setSelectedVendorVehicle('');
-        }
-    }, [entryType, formData.source]);
+
 
     // Calculate Total Quantity for Vendor based on Vehicle Capacity
     useEffect(() => {
@@ -66,10 +48,6 @@ const PurchaseForm = ({
                 const intId = parseInt(selectedVendorVehicle.replace('int-', ''));
                 const iv = vehicles.find(v => v.id === intId);
                 if (iv) selectedCapacity = iv.capacity_liters;
-            } else {
-                const venId = parseInt(selectedVendorVehicle.replace('ven-', ''));
-                const vv = vendorVehicles.find(v => v.id === venId);
-                if (vv) selectedCapacity = vv.capacity_liters;
             }
 
             if (selectedCapacity > 0 && !isManualOverride) {
@@ -79,7 +57,7 @@ const PurchaseForm = ({
                 }));
             }
         }
-    }, [selectedVendorVehicle, formData.load_count, isManualOverride, vendorVehicles, vehicles, entryType]);
+    }, [selectedVendorVehicle, formData.load_count, isManualOverride, vehicles, entryType]);
 
     // Fetch Entry Data if in Edit Mode
     useEffect(() => {
@@ -168,8 +146,13 @@ const PurchaseForm = ({
         setFormData(prev => {
             const newData = { ...prev, [name]: value };
             
+            // Auto-calculate quantity based on manual override
+            if (isManualOverride && (name === 'manual_capacity_liters' || name === 'load_count')) {
+                const manualCap = parseFloat(newData.manual_capacity_liters) || 0;
+                newData.total_quantity_liters = manualCap * (newData.load_count || 1);
+            }
             // Auto-calculate quantity for Internal when vehicle/load changes
-            if (entryType === 'Internal' && !isManualOverride) {
+            else if (entryType === 'Internal' && !isManualOverride) {
                 if (name === 'vehicle' || name === 'load_count') {
                     const veh = vehicles.find(v => v.id === parseInt(newData.vehicle));
                     if (veh) {
@@ -183,7 +166,7 @@ const PurchaseForm = ({
                 const current = parseFloat(newData.meter_reading_current) || 0;
                 const previous = parseFloat(newData.meter_reading_previous) || 0;
                 if (current >= previous) {
-                    newData.total_quantity_liters = (current - previous).toFixed(4);
+                    newData.total_quantity_liters = (current - previous).toFixed(2);
                 }
             }
 
@@ -209,9 +192,6 @@ const PurchaseForm = ({
             if (selectedVendorVehicle.startsWith('int-')) {
                 const iv = vehicles.find(v => v.id === parseInt(selectedVendorVehicle.replace('int-', '')));
                 if (iv) selectedCapacity = iv.capacity_liters;
-            } else {
-                const vv = vendorVehicles.find(v => v.id === parseInt(selectedVendorVehicle.replace('ven-', '')));
-                if (vv) selectedCapacity = vv.capacity_liters;
             }
         }
 
@@ -238,6 +218,16 @@ const PurchaseForm = ({
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (entryType === 'Pipeline') {
+            const current = parseFloat(formData.meter_reading_current) || 0;
+            const previous = parseFloat(formData.meter_reading_previous) || 0;
+            if (previous > current) {
+                setToast({ message: 'Previous meter reading cannot be greater than current reading!', type: 'error' });
+                return;
+            }
+        }
+
         if (calculatedCost === null) {
             setToast({ message: 'Please calculate cost before saving', type: 'error' });
             return;
@@ -297,7 +287,6 @@ const PurchaseForm = ({
                                     total_cost: 0 
                                 }));
                                 setSelectedVendorVehicle('');
-                                setVendorVehicles([]);
                                 setCalculatedCost(null);
                                 setIsManualOverride(false);
                             }}
@@ -326,7 +315,6 @@ const PurchaseForm = ({
                                     total_cost: 0 
                                 }));
                                 setSelectedVendorVehicle('');
-                                setVendorVehicles([]);
                                 setCalculatedCost(null);
                                 setIsManualOverride(false);
                             }}
@@ -355,7 +343,6 @@ const PurchaseForm = ({
                                     total_cost: 0 
                                 }));
                                 setSelectedVendorVehicle('');
-                                setVendorVehicles([]);
                                 setCalculatedCost(null);
                                 setIsManualOverride(false);
                             }}
@@ -376,6 +363,7 @@ const PurchaseForm = ({
                             name="entry_date"
                             value={formData.entry_date}
                             onChange={handleChange}
+                            max={new Date().toISOString().split('T')[0]}
                             required
                             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 dark:text-white"
                         />
@@ -529,7 +517,6 @@ const PurchaseForm = ({
                                             setSelectedVendorVehicle(val);
                                             setCalculatedCost(null);
                                             
-                                            // If it's an internal vehicle, set the form field for it
                                             if (val.startsWith('int-')) {
                                                 const intId = parseInt(val.replace('int-', ''));
                                                 setFormData(prev => ({ ...prev, vehicle: intId }));
@@ -538,23 +525,14 @@ const PurchaseForm = ({
                                             }
                                         }}
                                         disabled={!formData.source}
+                                        required
                                         className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 dark:text-white"
                                     >
-                                        <option value="">Select Vehicle (Optional)</option>
+                                        <option value="">Select Vehicle</option>
                                         
-                                        {/* Internal Vehicles Group */}
-                                        <optgroup label="Internal Vehicles (Rathinam)">
+                                        <optgroup label="Available Vehicles">
                                             {vehicles.map(v => (
                                                 <option key={`int-${v.id}`} value={`int-${v.id}`}>
-                                                    {v.vehicle_name} — {v.capacity_liters?.toLocaleString()}L
-                                                </option>
-                                            ))}
-                                        </optgroup>
-
-                                        {/* Vendor Vehicles Group */}
-                                        <optgroup label="Vendor Registered Vehicles">
-                                            {vendorVehicles.map(v => (
-                                                <option key={`ven-${v.id}`} value={`ven-${v.id}`}>
                                                     {v.vehicle_name} — {v.capacity_liters?.toLocaleString()}L
                                                 </option>
                                             ))}
@@ -616,12 +594,7 @@ const PurchaseForm = ({
                             type="number" 
                             name="manual_capacity_liters" 
                             value={formData.manual_capacity_liters} 
-                            onChange={(e) => {
-                                handleChange(e);
-                                if (isManualOverride) {
-                                    setFormData(prev => ({ ...prev, total_quantity_liters: e.target.value }));
-                                }
-                            }} 
+                            onChange={handleChange} 
                             disabled={!isManualOverride} 
                             placeholder={!isManualOverride ? "Standard capacity used" : "Enter manual override"}
                             className={`w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md ${!isManualOverride ? 'bg-gray-100 dark:bg-slate-900/30 opacity-50' : 'bg-white dark:bg-slate-700 dark:text-white'}`} 
@@ -647,7 +620,7 @@ const PurchaseForm = ({
                     </div>
                     {entryType === 'Vendor' && selectedVendorVehicle && (
                         <p className="text-xs text-green-600 dark:text-green-400 mt-2">
-                            ✓ Using vehicle-specific rate for {vendorVehicles.find(v => `ven-${v.id}` === selectedVendorVehicle || `int-${v.id}` === selectedVendorVehicle)?.vehicle_name}
+                            ✓ Using vehicle-specific rate for {vehicles.find(v => `int-${v.id}` === selectedVendorVehicle)?.vehicle_name}
                         </p>
                     )}
                 </div>

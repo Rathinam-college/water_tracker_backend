@@ -72,7 +72,7 @@ const YieldForm = ({
         const data = {
             ...yieldFormData,
             yield_liters: yieldFormData.yield_liters || 
-                (parseFloat(yieldFormData.current_reading) - parseFloat(yieldFormData.previous_reading || 0)).toFixed(4)
+                (parseFloat(yieldFormData.current_reading) - parseFloat(yieldFormData.previous_reading || 0)).toFixed(2)
         };
 
         try {
@@ -106,6 +106,7 @@ const YieldForm = ({
                         type="date"
                         value={yieldFormData.date}
                         onChange={(e) => setYieldFormData({ ...yieldFormData, date: e.target.value })}
+                        max={new Date().toISOString().split('T')[0]}
                         required
                         className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 dark:text-white"
                     />

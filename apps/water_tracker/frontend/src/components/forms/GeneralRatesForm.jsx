@@ -60,6 +60,7 @@ const GeneralRatesForm = ({ onCancel, setToast }) => {
                             type="date"
                             value={formData.date}
                             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                            max={new Date().toISOString().split('T')[0]}
                             required
                             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 dark:text-white"
                         />
@@ -70,6 +71,7 @@ const GeneralRatesForm = ({ onCancel, setToast }) => {
                             type="date"
                             value={formData.effective_date}
                             onChange={(e) => setFormData({ ...formData, effective_date: e.target.value })}
+                            max={new Date().toISOString().split('T')[0]}
                             required
                             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 dark:text-white"
                         />
