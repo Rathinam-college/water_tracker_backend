@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from . import views, reports_views
 from .views import (
     UserViewSet, MasterLocationViewSet, MasterSourceViewSet,
-    MasterInternalVehicleViewSet, MasterVendorVehicleViewSet,
+    MasterInternalVehicleViewSet,
     RateHistoryInternalVehicleViewSet, RateHistoryVendorViewSet,
     RateHistoryPipelineViewSet, WaterEntryViewSet,
     YieldLocationViewSet, YieldEntryViewSet,
@@ -20,7 +20,7 @@ router.register(r'users', UserViewSet)
 router.register(r'locations', MasterLocationViewSet)
 router.register(r'sources', MasterSourceViewSet)
 router.register(r'internal-vehicles', MasterInternalVehicleViewSet)
-router.register(r'vendor-vehicles', MasterVendorVehicleViewSet)
+
 router.register(r'rates/internal', RateHistoryInternalVehicleViewSet)
 router.register(r'rates/vendor', RateHistoryVendorViewSet)
 router.register(r'rates/pipeline', RateHistoryPipelineViewSet)
@@ -67,7 +67,10 @@ urlpatterns = [
     path('reports/category-monthly-breakdown/', reports_views.CategoryMonthlyBreakdownReportView.as_view(), name='category-monthly-breakdown'),
     path('reports/procurement/', reports_views.ProcurementReportView.as_view(), name='procurement-report'),
     path('reports/muthu-nagar-building-wise/', reports_views.MuthuNagarBuildingWiseReportView.as_view(), name='muthu-nagar-building-wise'),
+
     path('reports/bannari-building-wise/', reports_views.BannariBuildingWiseReportView.as_view(), name='bannari-building-wise'),
+    path('reports/varahi-building-wise/', reports_views.VarahiBuildingWiseReportView.as_view(), name='varahi-building-wise'),
+    path('reports/varahi-rathinam-vehicle/', reports_views.VarahiRathinamVehicleReportView.as_view(), name='varahi-rathinam-vehicle'),
     
     # Auth endpoints
     path('auth/request-password-reset/', views.RequestPasswordResetView.as_view(), name='request-password-reset'),

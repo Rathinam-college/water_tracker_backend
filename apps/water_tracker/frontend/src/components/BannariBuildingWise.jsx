@@ -38,7 +38,7 @@ const BannariBuildingWise = () => {
         const worksheetData = data.report_data.map((item, index) => ({
             'S.No': index + 1,
             'Building Name': item.location,
-            '25 KL Loads': item.count_25kl,
+            '22.5 KL Loads': item.count_22_5kl,
             '12 KL Loads': item.count_12kl,
             '6 KL Loads': item.count_6kl,
             'Total Quantity (Ltrs)': item.total_liters,
@@ -47,7 +47,7 @@ const BannariBuildingWise = () => {
 
         const summaryData = [
             ['Grand Total'],
-            ['Total 25 KL Loads', data.grand_total.count_25kl],
+            ['Total 22.5 KL Loads', data.grand_total.count_22_5kl],
             ['Total 12 KL Loads', data.grand_total.count_12kl],
             ['Total 6 KL Loads', data.grand_total.count_6kl],
             ['Total Quantity', `${data.grand_total.total_liters.toLocaleString()} Ltrs`],
@@ -58,7 +58,7 @@ const BannariBuildingWise = () => {
             worksheetData,
             `Bannari_Building_Wise_${data.month_name}_${data.year}`,
             'Building Wise Purchase',
-            `Building Wise Water Purchase from Bannari Water (${data.month_name} ${data.year})`,
+            `Building Wise Normal Water Purchase from Bannari Water (${data.month_name} ${data.year})`,
             `Month: ${data.month_name} ${data.year}`,
             summaryData
         );
@@ -68,7 +68,7 @@ const BannariBuildingWise = () => {
         setExporting(true);
         try {
             await exportReportToPDF(
-                `Building Wise Water Purchase from Bannari Water (${data.month_name} ${data.year})`,
+                `Building Wise Normal Water Purchase from Bannari Water (${data.month_name} ${data.year})`,
                 `${data.month_name} ${data.year}`,
                 null, // No charts
                 'bannari-table',
@@ -105,7 +105,7 @@ const BannariBuildingWise = () => {
         <div className="space-y-6">
             <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 border border-gray-200 dark:border-slate-700">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">
-                    Building Wise Water Purchase (Bannari Water)
+                    Building Wise Normal Water Purchase from Bannari Water
                 </h2>
 
                 <div className="flex flex-wrap items-center gap-4">
@@ -159,8 +159,8 @@ const BannariBuildingWise = () => {
                 <>
                     <div id="bannari-summary" className="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg border border-indigo-100 dark:border-indigo-800">
-                            <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium uppercase">Total 25 KL Loads</p>
-                            <p className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">{data.grand_total.count_25kl}</p>
+                            <p className="text-sm text-indigo-600 dark:text-indigo-400 font-medium uppercase">Total 22.5 KL Loads</p>
+                            <p className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">{data.grand_total.count_22_5kl}</p>
                         </div>
                         <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800">
                             <p className="text-sm text-blue-600 dark:text-blue-400 font-medium uppercase">Total 12 KL Loads</p>
@@ -186,7 +186,7 @@ const BannariBuildingWise = () => {
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">S.No</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Building Name</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">25 KL Loads</th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">22.5 KL Loads</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">12 KL Loads</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">6 KL Loads</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Total Quantity (Ltrs)</th>
@@ -198,7 +198,7 @@ const BannariBuildingWise = () => {
                                     <tr key={index} className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-slate-400">{index + 1}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-slate-100">{item.location}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-indigo-600 dark:text-indigo-400 font-medium">{item.count_25kl || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-600 dark:text-slate-300">{item.count_22_5kl || '-'}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-600 dark:text-slate-300">{item.count_12kl || '-'}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-600 dark:text-slate-300">{item.count_6kl || '-'}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-600 dark:text-slate-300 font-medium">{item.total_liters.toLocaleString()}</td>
@@ -209,7 +209,7 @@ const BannariBuildingWise = () => {
                             <tfoot className="bg-gray-50 dark:bg-slate-900/80 font-bold border-t-2 border-gray-200 dark:border-slate-700">
                                 <tr>
                                     <td colSpan="2" className="px-6 py-4 text-sm text-gray-900 dark:text-slate-100 uppercase text-center">Grand Total</td>
-                                    <td className="px-6 py-4 text-right text-sm text-indigo-600 dark:text-indigo-400">{data.grand_total.count_25kl}</td>
+                                    <td className="px-6 py-4 text-right text-sm text-indigo-600 dark:text-indigo-400">{data.grand_total.count_22_5kl}</td>
                                     <td className="px-6 py-4 text-right text-sm text-blue-600 dark:text-blue-400">{data.grand_total.count_12kl}</td>
                                     <td className="px-6 py-4 text-right text-sm text-emerald-600 dark:text-emerald-400">{data.grand_total.count_6kl}</td>
                                     <td className="px-6 py-4 text-right text-sm text-purple-600 dark:text-purple-400">{data.grand_total.total_liters.toLocaleString()}</td>

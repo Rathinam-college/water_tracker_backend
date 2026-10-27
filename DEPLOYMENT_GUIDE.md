@@ -56,7 +56,7 @@ services:
 
 ### File 2: `.env`
 ```env
-VITE_API_URL=http://insight.rathinamtechzone.com/water_tracker/api/
+VITE_API_URL=/water_tracker/api/
 ```
 
 > **That's it.** The server does NOT have your Python source code, your React source code, `node_modules`, `requirements.txt`, or anything else. Everything is **baked into the Docker images**.
@@ -85,7 +85,7 @@ Here is the full journey of your code from PC to production:
 docker-compose build backend
 
 # Build the frontend image (compiles React → HTML/JS, packages with Nginx)
-docker-compose build frontend --build-arg VITE_API_URL=http://insight.rathinamtechzone.com/water_tracker/api/
+docker compose build frontend --build-arg VITE_API_URL=/water_tracker/api/
 ```
 
 **What happens during build:**
@@ -95,40 +95,60 @@ docker-compose build frontend --build-arg VITE_API_URL=http://insight.rathinamte
 
 > After this step, your entire application exists as 2 images on your PC.
 
-### Step 2: Tag the Images
+### Step 2: Tag the Images for Production
+
+Since the server's `docker-compose.yml` expects specific production names, you must tag the images you just built:
 
 ```bash
-docker tag water-tracker-prod-backend janartlivein/water-tracker-backend:latest
-docker tag water-tracker-prod-frontend janartlivein/water-tracker-frontend:latest
+docker tag janartlivein/water-tracker-backend:latest rathinam-backend:prod
+docker tag janartlivein/water-tracker-frontend:latest rathinam-frontend:prod
 ```
 
-This names them to match your Docker Hub account (`janartlivein`).
+### Step 3: Transfer to Server
 
-### Step 3: Push to Docker Hub (Upload to the Internet)
+You have two options for getting these images to the server:
 
+**Option A: Push to Docker Hub (Internet)**
 ```bash
+docker tag rathinam-backend:prod janartlivein/water-tracker-backend:latest
+docker tag rathinam-frontend:prod janartlivein/water-tracker-frontend:latest
 docker push janartlivein/water-tracker-backend:latest
 docker push janartlivein/water-tracker-frontend:latest
 ```
 
-This uploads the images to `hub.docker.com` — a free cloud storage for Docker images. Anyone with the image name can pull it.
-
-### Step 4: Pull on the Server (Download from Internet)
-
-SSH into the server and run:
-
+**Option B: Offline Transfer via Tar files (Direct Copy)**
+If you prefer not to use Docker Hub, export the images as `.tar` files:
 ```bash
-ssh user@your-server-ip
-cd ~/water-tracker-prod
-docker-compose pull
+docker save -o backend_img.tar rathinam-backend:prod
+docker save -o frontend_img.tar rathinam-frontend:prod
+scp backend_img.tar frontend_img.tar gm@192.168.3.135:/home/gm/water-tracker-prod/
 ```
 
-This downloads the latest images from Docker Hub to the server.
+### Step 4: Load on the Server
+
+SSH into the server:
+```bash
+ssh gm@192.168.3.135
+cd /home/gm/water-tracker-prod
+```
+
+If using **Option A (Docker Hub)**:
+```bash
+docker compose pull
+docker tag janartlivein/water-tracker-backend:latest rathinam-backend:prod
+docker tag janartlivein/water-tracker-frontend:latest rathinam-frontend:prod
+```
+
+If using **Option B (Tar Files)**:
+```bash
+docker load -i backend_img.tar
+docker load -i frontend_img.tar
+```
 
 ### Step 5: Start/Restart the Containers
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 **What happens:**
@@ -195,24 +215,26 @@ Run these commands in order after making any code change:
 # === ON YOUR PC ===
 
 # 1. Build (only the service you changed)
-docker-compose build backend
+docker compose build backend
 # OR
-docker-compose build frontend --build-arg VITE_API_URL=http://insight.rathinamtechzone.com/water_tracker/api/
+docker compose build frontend --build-arg VITE_API_URL=/water_tracker/api/
 
-# 2. Tag
-docker tag water-tracker-prod-backend janartlivein/water-tracker-backend:latest
-docker tag water-tracker-prod-frontend janartlivein/water-tracker-frontend:latest
+# 2. Tag for Server
+docker tag janartlivein/water-tracker-backend:latest rathinam-backend:prod
+docker tag janartlivein/water-tracker-frontend:latest rathinam-frontend:prod
 
-# 3. Push
-docker push janartlivein/water-tracker-backend:latest
-docker push janartlivein/water-tracker-frontend:latest
+# 3. Export & Transfer (Offline Method)
+docker save -o rathinam-backend.tar rathinam-backend:prod
+docker save -o rathinam-frontend.tar rathinam-frontend:prod
+scp rathinam-backend.tar rathinam-frontend.tar gm@192.168.3.135:/home/gm/water-tracker-prod/
 
 # === ON THE SERVER (SSH in first) ===
 
-# 4. Pull & Restart
-cd ~/water-tracker-prod
-docker-compose pull
-docker-compose up -d
+# 4. Load & Restart
+cd /home/gm/water-tracker-prod
+docker load -i rathinam-backend.tar
+docker load -i rathinam-frontend.tar
+docker compose up -d
 ```
 
 ---
@@ -228,10 +250,14 @@ docker-compose logs -f
 
 # See only backend logs
 docker-compose logs -f backend
+docker-compose logs -f frontend
+docker compose -f docker-compose.prod.yml logs -f frontend backend
+
 
 # Restart everything
 docker-compose down
 docker-compose up -d
+docker compose -f docker-compose.yml up -d
 
 # Enter the backend container to debug
 docker-compose exec backend bash

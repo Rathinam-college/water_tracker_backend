@@ -69,17 +69,7 @@ class MasterInternalVehicle(models.Model):
 # Note: MasterVendorVehicle was in original models.py but seemingly unused in main logic?
 # It was defined but RateHistoryVendor used vehicle_capacity directly.
 # I will include it for completeness as it was in the models file.
-class MasterVendorVehicle(models.Model):
-    vendor = models.ForeignKey(
-        MasterSource, on_delete=models.CASCADE, related_name="vehicles"
-    )
-    vehicle_name = models.CharField(max_length=100)
-    capacity_liters = models.IntegerField()
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        db_table = "master_vendor_vehicles"
 
 
 # 3. Rate History Models (Cost Management)

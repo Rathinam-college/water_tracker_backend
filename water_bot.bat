@@ -189,7 +189,7 @@ if !ERRORLEVEL! neq 0 (
 )
 
 echo [3/4] Waiting for services to initialize...
-timeout /t 5 /nobreak >nul
+ping 127.0.0.1 -n 6 >nul
 
 echo [4/4] Running multi-service connectivity audit...
 ver > nul
@@ -197,12 +197,12 @@ ver > nul
 set "FRONTEND_READY=0"
 for /L %%i in (1,1,6) do (
     if "!FRONTEND_READY!"=="0" (
-        curl -Is http://localhost:8081/water_tracker/ | find "200" >nul
+        curl.exe -I -s http://localhost:8081/water_tracker/ | find "200" >nul
         if !ERRORLEVEL! equ 0 (
             set "FRONTEND_READY=1"
         ) else (
             echo Waiting for frontend to respond... (Attempt %%i/6)
-            timeout /t 3 /nobreak >nul
+            ping 127.0.0.1 -n 4 >nul
         )
     )
 )
@@ -214,16 +214,16 @@ if "!FRONTEND_READY!"=="0" (
 echo [OK] Frontend is UP on Port 8081
 
 set "API_READY=0"
-curl -si -u gm_admin:gm123 http://localhost:8081/water_tracker/api/dropdown-data/ | find "200" >nul
+curl.exe -s -i -u gm_admin:gm123 http://localhost:8081/water_tracker/api/dropdown-data/ | find "200" >nul
 if !ERRORLEVEL! equ 0 set "API_READY=1"
 
-if "!API_READY!"=="0" curl -si -u admin:admin http://localhost:8081/water_tracker/api/dropdown-data/ | find "200" >nul
+if "!API_READY!"=="0" curl.exe -s -i -u admin:admin http://localhost:8081/water_tracker/api/dropdown-data/ | find "200" >nul
 if !ERRORLEVEL! equ 0 set "API_READY=1"
 
-if "!API_READY!"=="0" curl -si -u admin:admin123 http://localhost:8081/water_tracker/api/dropdown-data/ | find "200" >nul
+if "!API_READY!"=="0" curl.exe -s -i -u admin:admin123 http://localhost:8081/water_tracker/api/dropdown-data/ | find "200" >nul
 if !ERRORLEVEL! equ 0 set "API_READY=1"
 
-if "!API_READY!"=="0" curl -si -u admin:Neat-Admin-SkyRoom-99^! http://localhost:8081/water_tracker/api/dropdown-data/ | find "200" >nul
+if "!API_READY!"=="0" curl.exe -s -i -u "admin:Neat-Admin-SkyRoom-99^!" http://localhost:8081/water_tracker/api/dropdown-data/ | find "200" >nul
 if !ERRORLEVEL! equ 0 set "API_READY=1"
 
 if "!API_READY!"=="0" (
@@ -256,7 +256,7 @@ start "Water Tracker Frontend" cmd /k "cd apps\water_tracker\frontend && npm ins
 echo [OK] Frontend started in new window.
 
 echo [3/3] Waiting for services to initialize (10 seconds)...
-timeout /t 10 /nobreak >nul
+ping 127.0.0.1 -n 11 >nul
 
 echo.
 echo ==========================================

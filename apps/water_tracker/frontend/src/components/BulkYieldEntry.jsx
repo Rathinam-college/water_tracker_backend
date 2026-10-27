@@ -11,6 +11,8 @@ const BulkYieldEntry = () => {
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [toast, setToast] = useState(null);
+    const [preventFetch, setPreventFetch] = useState(false);
+    const [originalDate, setOriginalDate] = useState(date);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -24,6 +26,7 @@ const BulkYieldEntry = () => {
                 yield_liters: item.existing_yield_liters || '',
                 comments: item.comments || ''
             })));
+            setOriginalDate(date);
             console.log('Bulk data:', response.data); // Helpful for debugging
         } catch (error) {
             console.error('Failed to fetch bulk data:', error);
@@ -34,8 +37,10 @@ const BulkYieldEntry = () => {
     }, [date]);
 
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        if (!preventFetch) {
+            fetchData();
+        }
+    }, [fetchData, preventFetch]);
 
     const handleReadingChange = (index, value) => {
         const newRows = [...rows];
@@ -95,7 +100,7 @@ const BulkYieldEntry = () => {
 
         setSubmitting(true);
         try {
-            await api.post('yield-entries/bulk_create/', {
+            const payload = {
                 date,
                 entries: validEntries.map(r => ({
                     location_id: r.location_id,
@@ -105,7 +110,13 @@ const BulkYieldEntry = () => {
                     yield_liters: r.is_manual_yield ? parseFloat(r.yield_liters || 0) : null,
                     comments: r.comments
                 }))
-            });
+            };
+
+            if (originalDate && originalDate !== date) {
+                payload.original_date = originalDate;
+            }
+
+            await api.post('yield-entries/bulk_create/', payload);
             setToast({ message: `Successfully saved ${validEntries.length} entries`, type: 'success' });
             setTimeout(() => navigate('/yield-entries'), 1500);
         } catch (error) {
@@ -137,16 +148,30 @@ const BulkYieldEntry = () => {
             </div>
 
             <div className="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-6 mb-6 border border-blue-50 dark:border-slate-700">
-                <div className="max-w-xs">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                        Date
-                    </label>
-                    <input
-                        type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
-                    />
+                <div className="flex items-end gap-6 max-w-lg">
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                            Date
+                        </label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+                        />
+                    </div>
+                    <div className="flex items-center mb-2">
+                        <input
+                            type="checkbox"
+                            id="preventFetch"
+                            checked={preventFetch}
+                            onChange={(e) => setPreventFetch(e.target.checked)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                        />
+                        <label htmlFor="preventFetch" className="ml-2 block text-sm text-gray-700 dark:text-slate-300 cursor-pointer">
+                            Change date without losing entered data
+                        </label>
+                    </div>
                 </div>
             </div>
 
